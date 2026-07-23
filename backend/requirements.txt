@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+python-dotenv
+langchain
+langchain-openai
+langchain-community
+faiss-cpu
+pypdf
+ragas
+datasets
+langsmith
+sqlalchemy
+psycopg2-binary
+pydantic
+pydantic-settings
+httpx
+openai
