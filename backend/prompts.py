@@ -1,4 +1,4 @@
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 
 QA_TEMPLATE_V1 = """Answer the question using only the context below. \
 If the answer is not contained in the context, say you don't know — \
