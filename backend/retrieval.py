@@ -12,9 +12,18 @@ _llm = ChatGoogleGenerativeAI(
     google_api_key=settings.google_api_key,
 )
 
-# $ per 1K tokens for gemini-2.5-flash 
+# $ per 1K tokens for gemini-flash-latest
 _INPUT_COST_PER_1K = 0.0003
 _OUTPUT_COST_PER_1K = 0.0025
+
+
+def _extract_text(content) -> str:
+    if isinstance(content, str):
+        return content
+    return "".join(
+        block.get("text", "") if isinstance(block, dict) else str(block)
+        for block in content
+    )
 
 
 def answer_question(
@@ -47,7 +56,7 @@ def answer_question(
     )
 
     return {
-        "answer": response.content,
+        "answer": _extract_text(response.content),
         "sources": [doc.page_content for doc in docs],
         "latency_ms": latency_ms,
         "token_count": token_count,

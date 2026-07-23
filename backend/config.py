@@ -1,12 +1,16 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
+    model_config = SettingsConfigDict(env_file=REPO_ROOT / ".env", case_sensitive=False)
 
     # LLM (Gemini)
     google_api_key: str
-    model_name: str = "gemini-2.5-flash"
+    model_name: str = "gemini-flash-latest"
     embedding_model: str = "models/gemini-embedding-001"
 
     # Supabase

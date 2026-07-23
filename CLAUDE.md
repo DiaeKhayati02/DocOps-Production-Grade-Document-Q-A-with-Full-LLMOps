@@ -61,7 +61,7 @@ README with architecture diagram, experiment results, design decisions.
 - `LangSmith` — experiment tracking and tracing
 
 ### LLM
-- `gemini-2.5-flash` (primary) — cheap, fast, good quality, via Google's Gemini API
+- `gemini-flash-latest` (primary) — cheap, fast, good quality, via Google's Gemini API
 - Configurable via `.env`
 
 ### Database
@@ -328,7 +328,7 @@ Returns `{ "status": "ok" }` for Railway health checks.
 
 # LLM (Gemini)
 GOOGLE_API_KEY=your_key_here
-MODEL_NAME=gemini-2.5-flash
+MODEL_NAME=gemini-flash-latest
 EMBEDDING_MODEL=models/gemini-embedding-001
 
 # Supabase
@@ -367,7 +367,7 @@ Always log them to the experiments table when you change them.
 | CHUNK_OVERLAP | 128 | Overlap between chunks |
 | RETRIEVER_K | 4 | Chunks retrieved per query |
 | EMBEDDING_MODEL | models/gemini-embedding-001 | Embedding model |
-| MODEL_NAME | gemini-2.5-flash | Generation model |
+| MODEL_NAME | gemini-flash-latest | Generation model |
 | prompt_version | v1 | Which template from prompts.py |
 
 Run at least 3 experiments across the project. Suggested sequence:
@@ -609,8 +609,8 @@ google-generativeai
 
 4. **Cost tracking formula:**
    - gemini-embedding-001: ~$0.00015 per 1K tokens
-   - gemini-2.5-flash input: ~$0.0003 per 1K tokens
-   - gemini-2.5-flash output: ~$0.0025 per 1K tokens
+   - gemini-flash-latest input: ~$0.0003 per 1K tokens
+   - gemini-flash-latest output: ~$0.0025 per 1K tokens
    (Verify current rates at ai.google.dev/pricing before finalizing — Gemini
    pricing changes more often than these numbers should be trusted blindly.)
    Store cost_usd on every message row. Surface in dashboard.
