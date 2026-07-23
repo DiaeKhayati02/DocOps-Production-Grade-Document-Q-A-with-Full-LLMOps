@@ -4,10 +4,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
 
-    # LLM
-    openai_api_key: str
-    model_name: str = "gpt-4o-mini"
-    embedding_model: str = "text-embedding-3-small"
+    # LLM (Gemini)
+    google_api_key: str
+    model_name: str = "gemini-2.5-flash"
+    embedding_model: str = "models/gemini-embedding-001"
 
     # Supabase
     database_url: str

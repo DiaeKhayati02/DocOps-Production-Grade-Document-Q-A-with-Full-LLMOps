@@ -54,14 +54,14 @@ README with architecture diagram, experiment results, design decisions.
 ### AI / LangChain layer
 - `pypdf` — PDF text extraction
 - `RecursiveCharacterTextSplitter` — chunk documents
-- `OpenAIEmbeddings` — embed chunks (text-embedding-3-small)
+- `GoogleGenerativeAIEmbeddings` — embed chunks (gemini-embedding-001)
 - `FAISS` — in-memory vector store per document session
 - `RetrievalQA` chain — retrieval + generation
 - `RAGAS` — automated evaluation (faithfulness, answer relevance, context relevance)
 - `LangSmith` — experiment tracking and tracing
 
 ### LLM
-- `gpt-4o-mini` (primary) — cheap, fast, good quality
+- `gemini-2.5-flash` (primary) — cheap, fast, good quality, via Google's Gemini API
 - Configurable via `.env`
 
 ### Database

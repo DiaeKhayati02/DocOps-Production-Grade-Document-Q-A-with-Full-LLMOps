@@ -2,7 +2,7 @@ fastapi
 uvicorn
 python-dotenv
 langchain
-langchain-openai
+langchain-google-genai
 langchain-community
 faiss-cpu
 pypdf
@@ -14,4 +14,4 @@ psycopg2-binary
 pydantic
 pydantic-settings
 httpx
-openai
+google-generativeai
