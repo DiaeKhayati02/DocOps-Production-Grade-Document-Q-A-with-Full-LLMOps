@@ -326,10 +326,10 @@ Returns `{ "status": "ok" }` for Railway health checks.
 ```env
 # .env.example
 
-# LLM
-OPENAI_API_KEY=your_key_here
-MODEL_NAME=gpt-4o-mini
-EMBEDDING_MODEL=text-embedding-3-small
+# LLM (Gemini)
+GOOGLE_API_KEY=your_key_here
+MODEL_NAME=gemini-2.5-flash
+EMBEDDING_MODEL=models/gemini-embedding-001
 
 # Supabase
 DATABASE_URL=postgresql://postgres:[password]@db.[project].supabase.co:5432/postgres
@@ -366,8 +366,8 @@ Always log them to the experiments table when you change them.
 | CHUNK_SIZE | 512 | Characters per chunk |
 | CHUNK_OVERLAP | 128 | Overlap between chunks |
 | RETRIEVER_K | 4 | Chunks retrieved per query |
-| EMBEDDING_MODEL | text-embedding-3-small | Embedding model |
-| MODEL_NAME | gpt-4o-mini | Generation model |
+| EMBEDDING_MODEL | models/gemini-embedding-001 | Embedding model |
+| MODEL_NAME | gemini-2.5-flash | Generation model |
 | prompt_version | v1 | Which template from prompts.py |
 
 Run at least 3 experiments across the project. Suggested sequence:
@@ -574,7 +574,7 @@ fastapi
 uvicorn
 python-dotenv
 langchain
-langchain-openai
+langchain-google-genai
 langchain-community
 faiss-cpu
 pypdf
@@ -584,8 +584,9 @@ langsmith
 sqlalchemy
 psycopg2-binary
 pydantic
+pydantic-settings
 httpx
-openai
+google-generativeai
 ```
 
 ---
@@ -607,9 +608,11 @@ openai
    extra API calls.
 
 4. **Cost tracking formula:**
-   - text-embedding-3-small: $0.00002 per 1K tokens
-   - gpt-4o-mini input: $0.000150 per 1K tokens
-   - gpt-4o-mini output: $0.000600 per 1K tokens
+   - gemini-embedding-001: ~$0.00015 per 1K tokens
+   - gemini-2.5-flash input: ~$0.0003 per 1K tokens
+   - gemini-2.5-flash output: ~$0.0025 per 1K tokens
+   (Verify current rates at ai.google.dev/pricing before finalizing — Gemini
+   pricing changes more often than these numbers should be trusted blindly.)
    Store cost_usd on every message row. Surface in dashboard.
 
 5. **Experiment config as JSONB** — store full config dict in experiments
