@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DocOps</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>DocOps</h1>
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="upload-section" class="card">
+      <div id="drop-zone" class="drop-zone">
+        <p>Drag &amp; drop a PDF here, or</p>
+        <button id="upload-button" type="button">
+          <span class="btn-label">Choose PDF</span>
+          <span class="spinner" hidden></span>
+        </button>
+        <input type="file" id="file-input" accept="application/pdf" hidden />
+      </div>
+    </section>
+
+    <section id="document-info" class="card" hidden>
+      <span id="doc-filename"></span>
+      <span id="doc-chunk-count"></span>
+      <span id="doc-cached-badge" class="badge" hidden>cached</span>
+    </section>
+
+    <p id="error-message" class="error" hidden></p>
+
+    <section id="chat-section" class="card" hidden>
+      <div id="conversation"></div>
+      <form id="chat-form">
+        <textarea
+          id="question-input"
+          placeholder="Ask a question about this document... (Enter to send, Shift+Enter for newline)"
+          rows="2"
+        ></textarea>
+        <button type="submit" id="send-button">
+          <span class="btn-label">Send</span>
+          <span class="spinner" hidden></span>
+        </button>
+      </form>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -73,6 +73,7 @@ def chat(payload: ChatRequest, db: Session = Depends(get_db)):
         "answer": result["answer"],
         "sources": result["sources"],
         "latency_ms": result["latency_ms"],
+        "cost_usd": result["cost_usd"],
         "message_id": assistant_message.id,
     }
 
