@@ -16,3 +16,5 @@ pydantic
 pydantic-settings
 httpx
 google-generativeai
+google-genai
+instructor[google-genai]
