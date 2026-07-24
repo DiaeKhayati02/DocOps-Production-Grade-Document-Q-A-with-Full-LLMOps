@@ -1,3 +1,4 @@
+import math
 import sys
 import types
 
@@ -36,6 +37,16 @@ _answer_relevancy = AnswerRelevancy(llm=_ragas_llm, embeddings=_ragas_embeddings
 _context_relevance = ContextRelevance(llm=_ragas_llm)
 
 
+def _clean_score(value: float) -> float:
+    # ragas metrics can return NaN on degenerate inputs (e.g. a division by
+    # zero inside answer_relevancy's cosine-similarity math). NaN/Infinity
+    # aren't valid JSON, so anything non-finite gets treated as "could not
+    # be confidently scored" and clamped to 0.0 rather than crashing later.
+    if math.isnan(value) or math.isinf(value):
+        return 0.0
+    return round(value, 3)
+
+
 async def score_response(question: str, answer: str, contexts: list[str]) -> dict:
     faithfulness_result = await _faithfulness.ascore(
         user_input=question, response=answer, retrieved_contexts=contexts
@@ -47,9 +58,9 @@ async def score_response(question: str, answer: str, contexts: list[str]) -> dic
         user_input=question, retrieved_contexts=contexts
     )
 
-    faithfulness = round(faithfulness_result.value, 3)
-    answer_relevance = round(answer_relevance_result.value, 3)
-    context_relevance = round(context_relevance_result.value, 3)
+    faithfulness = _clean_score(faithfulness_result.value)
+    answer_relevance = _clean_score(answer_relevance_result.value)
+    context_relevance = _clean_score(context_relevance_result.value)
 
     return {
         "faithfulness": faithfulness,
