@@ -138,11 +138,13 @@ chatForm.addEventListener("submit", async (e) => {
       throw new Error(data.detail || "No answer found in document");
     }
 
-    appendMessage("assistant", data.answer, {
+    const messageEl = appendMessage("assistant", data.answer, {
       sources: data.sources,
       latencyMs: data.latency_ms,
       costUsd: data.cost_usd,
     });
+
+    pollEvalScore(data.message_id, messageEl.querySelector(".score-badge"));
   } catch (err) {
     showError(err.message || "No answer found in document");
   } finally {
@@ -164,6 +166,11 @@ function appendMessage(role, content, extra = {}) {
     metaEl.textContent = `${extra.latencyMs}ms · $${extra.costUsd.toFixed(6)}`;
     messageEl.appendChild(metaEl);
 
+    const badgeEl = document.createElement("span");
+    badgeEl.className = "score-badge evaluating";
+    badgeEl.textContent = "evaluating...";
+    messageEl.appendChild(badgeEl);
+
     if (extra.sources && extra.sources.length > 0) {
       const details = document.createElement("details");
       details.className = "sources";
@@ -183,4 +190,41 @@ function appendMessage(role, content, extra = {}) {
 
   conversation.appendChild(messageEl);
   conversation.scrollTop = conversation.scrollHeight;
+
+  return messageEl;
+}
+
+function pollEvalScore(messageId, badgeEl) {
+  if (!badgeEl) {
+    return;
+  }
+
+  let attempts = 0;
+  const maxAttempts = 30; // ~60s at 2s/attempt, matches "RAGAS takes 3-10s" plus rate-limit retries
+
+  const interval = setInterval(async () => {
+    attempts += 1;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/eval/${messageId}`);
+      const data = await response.json();
+
+      if (data.ready) {
+        clearInterval(interval);
+        const pct = Math.round(data.avg_score * 100);
+        badgeEl.textContent = `${pct}% quality`;
+        badgeEl.classList.remove("evaluating");
+        badgeEl.classList.add(pct >= 80 ? "score-good" : pct >= 50 ? "score-mid" : "score-low");
+      }
+    } catch (err) {
+      // transient network hiccup — just try again next tick
+    }
+
+    if (attempts >= maxAttempts) {
+      clearInterval(interval);
+      if (badgeEl.classList.contains("evaluating")) {
+        badgeEl.textContent = "score unavailable";
+      }
+    }
+  }, 2000);
 }
