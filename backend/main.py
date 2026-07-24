@@ -1,10 +1,11 @@
-from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi import BackgroundTasks, Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from config import settings
-from database import Document, Message, get_db
+from database import Document, EvalScore, Message, SessionLocal, get_db
+from evaluation import score_response
 from ingest import process_upload
 from retrieval import answer_question
 
@@ -44,8 +45,28 @@ class ChatRequest(BaseModel):
     question: str
 
 
+async def run_evaluation(message_id, document_id, question: str, answer: str, sources: list[str]):
+    scores = await score_response(question, answer, sources)
+
+    db = SessionLocal()
+    try:
+        db.add(
+            EvalScore(
+                message_id=message_id,
+                document_id=document_id,
+                faithfulness=scores["faithfulness"],
+                answer_relevance=scores["answer_relevance"],
+                context_relevance=scores["context_relevance"],
+                avg_score=scores["avg_score"],
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+
 @app.post("/chat")
-def chat(payload: ChatRequest, db: Session = Depends(get_db)):
+def chat(payload: ChatRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     document = db.query(Document).filter(Document.id == payload.document_id).first()
     if document is None:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -69,12 +90,36 @@ def chat(payload: ChatRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(assistant_message)
 
+    background_tasks.add_task(
+        run_evaluation,
+        assistant_message.id,
+        document.id,
+        payload.question,
+        result["answer"],
+        result["sources"],
+    )
+
     return {
         "answer": result["answer"],
         "sources": result["sources"],
         "latency_ms": result["latency_ms"],
         "cost_usd": result["cost_usd"],
         "message_id": assistant_message.id,
+    }
+
+
+@app.get("/eval/{message_id}")
+def get_eval(message_id: str, db: Session = Depends(get_db)):
+    score = db.query(EvalScore).filter(EvalScore.message_id == message_id).first()
+    if score is None:
+        return {"ready": False}
+
+    return {
+        "faithfulness": score.faithfulness,
+        "answer_relevance": score.answer_relevance,
+        "context_relevance": score.context_relevance,
+        "avg_score": score.avg_score,
+        "ready": True,
     }
 
 
