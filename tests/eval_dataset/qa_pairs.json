@@ -1,0 +1,27 @@
+[
+  {
+    "pdf": "attention_is_all_you_need.pdf",
+    "question": "What is the main problem with RNN-based sequence models that this paper addresses?",
+    "ground_truth": "RNNs process tokens sequentially, which prevents parallelization within training examples and becomes a limiting factor at longer sequence lengths, making them slow to train."
+  },
+  {
+    "pdf": "attention_is_all_you_need.pdf",
+    "question": "What architecture does the paper propose instead of recurrence and convolutions?",
+    "ground_truth": "The Transformer, an architecture based solely on attention mechanisms, dispensing with recurrence and convolutions entirely."
+  },
+  {
+    "pdf": "attention_is_all_you_need.pdf",
+    "question": "What are the two main components of the Transformer architecture?",
+    "ground_truth": "An encoder that maps an input sequence to a sequence of continuous representations, and a decoder that generates an output sequence one element at a time based on the encoder's output."
+  },
+  {
+    "pdf": "attention_is_all_you_need.pdf",
+    "question": "How many attention heads are used in the base Transformer model?",
+    "ground_truth": "8 attention heads (h=8) in the base model."
+  },
+  {
+    "pdf": "attention_is_all_you_need.pdf",
+    "question": "What datasets were used to evaluate the model's translation performance?",
+    "ground_truth": "The WMT 2014 English-to-German and WMT 2014 English-to-French translation tasks."
+  }
+]
