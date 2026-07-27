@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from config import settings
 from database import Document, Chunk
+from retry import with_retry
 
 _faiss_indexes: dict[str, FAISS] = {}
 
@@ -41,7 +42,7 @@ def split_text(
 
 
 def build_index(chunks: list[str]) -> FAISS:
-    return FAISS.from_texts(chunks, embedding=_embeddings)
+    return with_retry(lambda: FAISS.from_texts(chunks, embedding=_embeddings))
 
 
 def load_index(document_id: str, db: Session) -> FAISS:

@@ -4,8 +4,9 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from config import settings
-from database import Document, EvalScore, Message, SessionLocal, get_db
+from database import Document, EvalScore, Experiment, Message, SessionLocal, get_db
 from evaluation import score_response
+from experiments import run_experiment
 from ingest import process_upload
 from retrieval import answer_question
 
@@ -121,6 +122,36 @@ def get_eval(message_id: str, db: Session = Depends(get_db)):
         "avg_score": score.avg_score,
         "ready": True,
     }
+
+
+class ExperimentRequest(BaseModel):
+    name: str
+    description: str = ""
+    config: dict
+
+
+@app.post("/experiments/start")
+async def start_experiment(payload: ExperimentRequest, db: Session = Depends(get_db)):
+    return await run_experiment(payload.name, payload.description, payload.config, db)
+
+
+@app.get("/experiments")
+def list_experiments(db: Session = Depends(get_db)):
+    experiments = db.query(Experiment).order_by(Experiment.created_at.desc()).all()
+    return [
+        {
+            "id": e.id,
+            "name": e.name,
+            "description": e.description,
+            "config": e.config,
+            "avg_faithfulness": e.avg_faithfulness,
+            "avg_answer_relevance": e.avg_answer_relevance,
+            "avg_context_relevance": e.avg_context_relevance,
+            "langsmith_run_id": e.langsmith_run_id,
+            "created_at": e.created_at,
+        }
+        for e in experiments
+    ]
 
 
 @app.get("/history/{document_id}")

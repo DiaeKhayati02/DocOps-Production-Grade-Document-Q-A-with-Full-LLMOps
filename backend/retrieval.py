@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from config import settings
 from ingest import load_index
 from prompts import get_prompt
+from retry import with_retry
 
 _llm = ChatGoogleGenerativeAI(
     model=settings.model_name,
@@ -36,7 +37,7 @@ def answer_from_index(index: FAISS, question: str, k: int, prompt_version: str =
     context = "\n\n".join(doc.page_content for doc in docs)
     prompt = get_prompt(prompt_version).format(context=context, question=question)
 
-    response = _llm.invoke(prompt)
+    response = with_retry(lambda: _llm.invoke(prompt))
 
     latency_ms = int((time.perf_counter() - start) * 1000)
 
