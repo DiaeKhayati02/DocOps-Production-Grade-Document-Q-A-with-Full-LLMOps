@@ -18,6 +18,7 @@ from ragas.llms.base import InstructorLLM, InstructorModelArgs
 from ragas.metrics.collections import AnswerRelevancy, ContextRelevance, Faithfulness
 
 from config import settings
+from retry import with_retry_async
 
 _client = genai.Client(api_key=settings.google_api_key)
 
@@ -48,14 +49,16 @@ def _clean_score(value: float) -> float:
 
 
 async def score_response(question: str, answer: str, contexts: list[str]) -> dict:
-    faithfulness_result = await _faithfulness.ascore(
-        user_input=question, response=answer, retrieved_contexts=contexts
+    faithfulness_result = await with_retry_async(
+        lambda: _faithfulness.ascore(
+            user_input=question, response=answer, retrieved_contexts=contexts
+        )
     )
-    answer_relevance_result = await _answer_relevancy.ascore(
-        user_input=question, response=answer
+    answer_relevance_result = await with_retry_async(
+        lambda: _answer_relevancy.ascore(user_input=question, response=answer)
     )
-    context_relevance_result = await _context_relevance.ascore(
-        user_input=question, retrieved_contexts=contexts
+    context_relevance_result = await with_retry_async(
+        lambda: _context_relevance.ascore(user_input=question, retrieved_contexts=contexts)
     )
 
     faithfulness = _clean_score(faithfulness_result.value)

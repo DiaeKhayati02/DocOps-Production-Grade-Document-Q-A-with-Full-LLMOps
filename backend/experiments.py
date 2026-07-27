@@ -16,9 +16,17 @@ TEST_PDF_PATH = REPO_ROOT / "tests" / "eval_dataset" / "pdfs" / "attention_is_al
 QA_PAIRS_PATH = REPO_ROOT / "tests" / "eval_dataset" / "qa_pairs.json"
 
 
+# Gemini's free tier caps chat generation at 5 requests/minute, and each
+# question needs ~5 calls (1 answer + ~4 across the three RAGAS metrics) — so
+# only a subset of the full qa_pairs.json golden set (kept at 5 for Phase 4)
+# is used live here to keep one experiment run within a few minutes.
+MAX_QUESTIONS = 3
+
+
 def _load_test_questions() -> list[str]:
     pairs = json.loads(QA_PAIRS_PATH.read_text(encoding="utf-8"))
-    return [pair["question"] for pair in pairs if pair["pdf"] == TEST_PDF_PATH.name]
+    questions = [pair["question"] for pair in pairs if pair["pdf"] == TEST_PDF_PATH.name]
+    return questions[:MAX_QUESTIONS]
 
 
 @traceable(name="run_experiment")
