@@ -1,5 +1,6 @@
 import hashlib
 import io
+import time
 
 from pypdf import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -41,8 +42,27 @@ def split_text(
     return splitter.split_text(text)
 
 
+# Gemini's free tier caps embedding at 100 requests/minute, and
+# embed_documents() makes one request per chunk. FAISS.from_texts() embeds
+# everything in a single un-batched call, so a document needing more than
+# ~100 chunks hits the quota wall every time — retrying doesn't help, since
+# each retry restarts from chunk zero and hits the exact same wall again.
+# Embedding in batches safely under the limit, with a pause between batches
+# for the per-minute window to clear, actually finishes instead.
+_EMBED_BATCH_SIZE = 90
+_EMBED_BATCH_PAUSE_SECONDS = 65
+
+
 def build_index(chunks: list[str]) -> FAISS:
-    return with_retry(lambda: FAISS.from_texts(chunks, embedding=_embeddings))
+    text_embedding_pairs = []
+    for i in range(0, len(chunks), _EMBED_BATCH_SIZE):
+        batch = chunks[i : i + _EMBED_BATCH_SIZE]
+        batch_embeddings = with_retry(lambda b=batch: _embeddings.embed_documents(b))
+        text_embedding_pairs.extend(zip(batch, batch_embeddings))
+        if i + _EMBED_BATCH_SIZE < len(chunks):
+            time.sleep(_EMBED_BATCH_PAUSE_SECONDS)
+
+    return FAISS.from_embeddings(text_embedding_pairs, embedding=_embeddings)
 
 
 def load_index(document_id: str, db: Session) -> FAISS:
