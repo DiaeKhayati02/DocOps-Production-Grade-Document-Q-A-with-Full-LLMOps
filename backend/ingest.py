@@ -28,10 +28,14 @@ def extract_text(file_bytes: bytes) -> tuple[str, int]:
     return "\n\n".join(pages), len(reader.pages)
 
 
-def split_text(text: str) -> list[str]:
+def split_text(
+    text: str,
+    chunk_size: int | None = None,
+    chunk_overlap: int | None = None,
+) -> list[str]:
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=settings.chunk_size,
-        chunk_overlap=settings.chunk_overlap,
+        chunk_size=chunk_size if chunk_size is not None else settings.chunk_size,
+        chunk_overlap=chunk_overlap if chunk_overlap is not None else settings.chunk_overlap,
     )
     return splitter.split_text(text)
 

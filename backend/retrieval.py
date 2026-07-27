@@ -1,5 +1,6 @@
 import time
 
+from langchain_community.vectorstores import FAISS
 from langchain_google_genai import ChatGoogleGenerativeAI
 from sqlalchemy.orm import Session
 
@@ -26,14 +27,8 @@ def _extract_text(content) -> str:
     )
 
 
-def answer_question(
-    document_id: str,
-    question: str,
-    db: Session,
-    prompt_version: str = "v1",
-) -> dict:
-    index = load_index(document_id, db)
-    retriever = index.as_retriever(search_kwargs={"k": settings.retriever_k})
+def answer_from_index(index: FAISS, question: str, k: int, prompt_version: str = "v1") -> dict:
+    retriever = index.as_retriever(search_kwargs={"k": k})
 
     start = time.perf_counter()
 
@@ -62,3 +57,13 @@ def answer_question(
         "token_count": token_count,
         "cost_usd": round(cost_usd, 6),
     }
+
+
+def answer_question(
+    document_id: str,
+    question: str,
+    db: Session,
+    prompt_version: str = "v1",
+) -> dict:
+    index = load_index(document_id, db)
+    return answer_from_index(index, question, settings.retriever_k, prompt_version)
