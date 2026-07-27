@@ -1,8 +1,15 @@
 from pathlib import Path
 
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+# pydantic-settings reads .env privately into the Settings object below — it
+# never touches the real process environment. Some libraries (LangSmith's
+# automatic tracing, for one) read os.environ directly and have no idea
+# Settings exists, so .env has to be loaded the "normal" way too.
+load_dotenv(REPO_ROOT / ".env")
 
 
 class Settings(BaseSettings):

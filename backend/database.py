@@ -1,6 +1,3 @@
-import os
-
-from dotenv import load_dotenv
 from sqlalchemy import (
     Column,
     Text,
@@ -17,11 +14,9 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy import create_engine
 
-load_dotenv()
+from config import settings
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-engine = create_engine(DATABASE_URL)
+engine = create_engine(settings.database_url)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 Base = declarative_base()
