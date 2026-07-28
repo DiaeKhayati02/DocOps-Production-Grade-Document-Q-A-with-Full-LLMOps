@@ -9,6 +9,7 @@ from database import CiRun, Document, EvalScore, Experiment, Message, SessionLoc
 from evaluation import score_response
 from experiments import run_experiment
 from ingest import process_upload
+from monitoring import get_summary, get_timeseries
 from retrieval import answer_question
 
 app = FastAPI(title="DocOps")
@@ -181,6 +182,16 @@ def list_ci_runs(db: Session = Depends(get_db)):
         }
         for r in runs
     ]
+
+
+@app.get("/monitoring/summary")
+def monitoring_summary(db: Session = Depends(get_db)):
+    return get_summary(db)
+
+
+@app.get("/monitoring/timeseries")
+def monitoring_timeseries(db: Session = Depends(get_db)):
+    return get_timeseries(db)
 
 
 @app.get("/history/{document_id}")
