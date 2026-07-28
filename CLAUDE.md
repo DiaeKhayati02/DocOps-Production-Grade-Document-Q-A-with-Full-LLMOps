@@ -477,11 +477,20 @@ jobs:
           LANGCHAIN_API_KEY: ${{ secrets.LANGCHAIN_API_KEY }}
           LANGCHAIN_TRACING_V2: "true"
           LANGCHAIN_PROJECT: "docops-ci"
+          # Capped to stay within Gemini's free-tier daily quota (20
+          # requests/day). Remove this once on a paid tier to score the
+          # full 30-question golden dataset.
+          CI_EVAL_MAX_QUESTIONS_PER_PDF: "1"
         run: python tests/run_ci_eval.py
 
       - name: Report results
         run: echo "CI eval complete — check ci_runs table for full results"
 ```
+
+The `GOOGLE_API_KEY`, `DATABASE_URL`, and `LANGCHAIN_API_KEY` secrets referenced
+above must be added under the repo's Settings → Secrets and variables →
+Actions before this workflow can pass — it fails immediately on startup
+if any required one is missing.
 
 ### tests/run_ci_eval.py behaviour
 1. Load each PDF from tests/eval_dataset/pdfs/
@@ -527,7 +536,10 @@ Layout:
   answer relevance | context relevance | avg | date
 - CI runs table: commit | branch | scores | pass/fail badge | date
 
-Use Chart.js from cdnjs for charts.
+Use Chart.js, vendored locally at `frontend/chart.umd.min.js` rather than
+loaded from cdnjs — the CDN was found to be blocked by a browser
+extension/ad-blocker during development, which would silently break the
+dashboard for any visitor with a similar blocker active.
 Auto-refresh all data every 60 seconds.
 
 ---
