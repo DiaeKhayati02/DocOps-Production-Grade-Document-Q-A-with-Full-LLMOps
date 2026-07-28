@@ -23,5 +23,130 @@
     "pdf": "attention_is_all_you_need.pdf",
     "question": "What datasets were used to evaluate the model's translation performance?",
     "ground_truth": "The WMT 2014 English-to-German and WMT 2014 English-to-French translation tasks."
+  },
+  {
+    "pdf": "attention_is_all_you_need.pdf",
+    "question": "What is multi-head attention and why is it used?",
+    "ground_truth": "Multi-head attention runs several attention operations in parallel, each with different learned linear projections, allowing the model to jointly attend to information from different representation subspaces at different positions, then concatenates and projects the results."
+  },
+  {
+    "pdf": "attention_is_all_you_need.pdf",
+    "question": "How does the Transformer handle word order without recurrence?",
+    "ground_truth": "It adds positional encodings, based on sine and cosine functions of different frequencies, to the input embeddings, since the model has no inherent notion of sequence order without recurrence or convolution."
+  },
+  {
+    "pdf": "attention_is_all_you_need.pdf",
+    "question": "What is the computational complexity advantage of self-attention over recurrent layers for typical sequence lengths?",
+    "ground_truth": "Self-attention layers connect all positions with a constant number of sequential operations (O(1)), whereas recurrent layers require O(n) sequential operations, making self-attention faster when the sequence length n is smaller than the representation dimensionality d."
+  },
+  {
+    "pdf": "attention_is_all_you_need.pdf",
+    "question": "What optimizer and learning rate schedule did the authors use for training?",
+    "ground_truth": "The Adam optimizer, with a learning rate that increased linearly for the first warmup_steps training steps and then decreased proportionally to the inverse square root of the step number."
+  },
+  {
+    "pdf": "attention_is_all_you_need.pdf",
+    "question": "What regularization techniques were used during training?",
+    "ground_truth": "Residual dropout applied to the output of each sub-layer and to the sums of embeddings and positional encodings, plus label smoothing during training."
+  },
+  {
+    "pdf": "rag_paper.pdf",
+    "question": "What are the two main components of a RAG system?",
+    "ground_truth": "A retriever that finds relevant documents (a pre-trained neural retriever, e.g. DPR) and a generator (a pre-trained sequence-to-sequence model, e.g. BART) that produces output conditioned on those documents and the input."
+  },
+  {
+    "pdf": "rag_paper.pdf",
+    "question": "What non-parametric memory source does the paper use for retrieval?",
+    "ground_truth": "A dense vector index of Wikipedia, accessed with a pre-trained neural retriever."
+  },
+  {
+    "pdf": "rag_paper.pdf",
+    "question": "What are the two RAG model variants proposed in the paper?",
+    "ground_truth": "RAG-Sequence, which uses the same retrieved document to generate the complete sequence, and RAG-Token, which can use a different retrieved document per generated token."
+  },
+  {
+    "pdf": "rag_paper.pdf",
+    "question": "What retriever architecture does RAG use?",
+    "ground_truth": "Dense Passage Retrieval (DPR), a bi-encoder architecture with separate BERT-based document and query encoders."
+  },
+  {
+    "pdf": "rag_paper.pdf",
+    "question": "What generator model is used in RAG?",
+    "ground_truth": "BART-large, a pre-trained sequence-to-sequence transformer model."
+  },
+  {
+    "pdf": "rag_paper.pdf",
+    "question": "Why is combining parametric and non-parametric memory beneficial according to the paper?",
+    "ground_truth": "Parametric memory (the pretrained language model) provides fluent generation, while non-parametric memory (retrieved documents) allows the model to access and update knowledge more precisely and to be revised without retraining, improving factual accuracy."
+  },
+  {
+    "pdf": "rag_paper.pdf",
+    "question": "On what types of tasks was RAG evaluated?",
+    "ground_truth": "Knowledge-intensive NLP tasks, including open-domain question answering, abstractive question answering, Jeopardy question generation, and fact verification."
+  },
+  {
+    "pdf": "rag_paper.pdf",
+    "question": "How does RAG's approach to updating knowledge differ from a purely parametric model?",
+    "ground_truth": "RAG's knowledge can be updated by simply swapping the retrieval index (e.g. with a newer Wikipedia dump) without retraining the model, whereas a purely parametric model requires expensive retraining to update its knowledge."
+  },
+  {
+    "pdf": "rag_paper.pdf",
+    "question": "What was one key finding about RAG's performance on open-domain question answering benchmarks?",
+    "ground_truth": "RAG achieved new state-of-the-art results on several open-domain QA benchmarks, outperforming both purely parametric seq2seq models and task-specific retrieve-and-extract architectures."
+  },
+  {
+    "pdf": "rag_paper.pdf",
+    "question": "How are the retriever and generator trained in RAG?",
+    "ground_truth": "They are fine-tuned jointly end-to-end, backpropagating the error signal through both the generator and the retriever's query encoder, while the document encoder and index are kept fixed."
+  },
+  {
+    "pdf": "lora_paper.pdf",
+    "question": "What problem does LoRA aim to solve?",
+    "ground_truth": "The high cost of fully fine-tuning very large pre-trained language models, which requires storing and deploying a full set of new parameters for every downstream task."
+  },
+  {
+    "pdf": "lora_paper.pdf",
+    "question": "What is the core idea behind LoRA?",
+    "ground_truth": "Freezing the pretrained model weights and injecting trainable low-rank decomposition matrices into each layer of the Transformer architecture, drastically reducing the number of trainable parameters for downstream tasks."
+  },
+  {
+    "pdf": "lora_paper.pdf",
+    "question": "Which weight matrices does LoRA typically target in the Transformer architecture?",
+    "ground_truth": "LoRA is typically applied to the self-attention module's weight matrices, such as the query and value projection matrices."
+  },
+  {
+    "pdf": "lora_paper.pdf",
+    "question": "What happens to the pretrained model weights during LoRA fine-tuning?",
+    "ground_truth": "They are frozen and not updated; only the injected low-rank matrices are trained."
+  },
+  {
+    "pdf": "lora_paper.pdf",
+    "question": "What is the effect of LoRA on inference latency compared to full fine-tuning?",
+    "ground_truth": "LoRA introduces no additional inference latency compared to a fully fine-tuned model, because the low-rank update matrices can be merged with the frozen weights after training."
+  },
+  {
+    "pdf": "lora_paper.pdf",
+    "question": "How does LoRA reduce the number of trainable parameters?",
+    "ground_truth": "By representing the weight update as a product of two much smaller low-rank matrices of rank r, where r is much smaller than the original weight matrix dimensions, instead of updating the full-size weight matrix directly."
+  },
+  {
+    "pdf": "lora_paper.pdf",
+    "question": "What models did the authors evaluate LoRA on?",
+    "ground_truth": "Large language models including RoBERTa, DeBERTa, GPT-2, and GPT-3."
+  },
+  {
+    "pdf": "lora_paper.pdf",
+    "question": "How does LoRA's performance compare to full fine-tuning?",
+    "ground_truth": "LoRA achieves comparable or better performance than full fine-tuning on several benchmarks, despite training far fewer parameters."
+  },
+  {
+    "pdf": "lora_paper.pdf",
+    "question": "What is one key practical advantage of LoRA for deploying multiple task-specific models?",
+    "ground_truth": "Since only the small low-rank matrices differ between tasks, many task-specific versions can be stored and swapped efficiently while sharing the same frozen base model, greatly reducing storage and switching costs."
+  },
+  {
+    "pdf": "lora_paper.pdf",
+    "question": "How is the low-rank update matrix initialized in LoRA?",
+    "ground_truth": "One of the two low-rank matrices (A) is initialized with random Gaussian values, and the other (B) is initialized to zero, so that the initial LoRA update is zero at the start of training."
   }
 ]
