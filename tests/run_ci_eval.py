@@ -15,12 +15,12 @@ def main() -> int:
     # Optional cap for local/dev runs where the full 30-question dataset
     # would blow through Gemini's free-tier daily quota. Leave unset in a
     # real CI run to score the complete golden dataset.
-    raw_max = os.environ.get("CI_EVAL_MAX_QUESTIONS_PER_PDF")
-    max_per_pdf = int(raw_max) if raw_max else None
+    raw_max = os.environ.get("CI_EVAL_MAX_TOTAL_QUESTIONS")
+    max_total = int(raw_max) if raw_max else None
 
     db = SessionLocal()
     try:
-        result = asyncio.run(run_ci_eval(db, max_questions_per_pdf=max_per_pdf))
+        result = asyncio.run(run_ci_eval(db, max_total_questions=max_total))
     finally:
         db.close()
 

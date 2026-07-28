@@ -38,15 +38,27 @@ def _load_pairs_by_pdf() -> dict[str, list[dict]]:
     return pairs_by_pdf
 
 
-async def run_ci_eval(db: Session, max_questions_per_pdf: int | None = None) -> dict:
+async def run_ci_eval(db: Session, max_total_questions: int | None = None) -> dict:
+    # CI-mode scoring costs ~7 Gemini calls/question (1 answer + faithfulness
+    # ~2 + answer_relevancy 1 + context_relevance 1 + answer_correctness ~2,
+    # the last one only run here since it needs ground_truth). Gemini's free
+    # tier caps generation at 20 requests/day total, so the cap here is on
+    # the TOTAL question count across all papers combined, not per-paper —
+    # 1 question from each of 3 papers alone is ~21 calls, already over
+    # budget. A capped run may not cover every paper; it proves the pipeline
+    # works end to end rather than being a full/representative eval.
     per_question_results = []
+    remaining = max_total_questions
 
     for pdf_name, pairs in _load_pairs_by_pdf().items():
+        if remaining is not None and remaining <= 0:
+            break
+
         text, _ = extract_text((PDF_DIR / pdf_name).read_bytes())
         chunks = split_text(text, settings.chunk_size, settings.chunk_overlap)
         index = build_index(chunks)
 
-        questions = pairs if max_questions_per_pdf is None else pairs[:max_questions_per_pdf]
+        questions = pairs if remaining is None else pairs[:remaining]
 
         for pair in questions:
             result = answer_from_index(index, pair["question"], settings.retriever_k, "v1")
@@ -54,6 +66,9 @@ async def run_ci_eval(db: Session, max_questions_per_pdf: int | None = None) -> 
                 pair["question"], result["answer"], result["sources"], pair["ground_truth"]
             )
             per_question_results.append({"pdf": pdf_name, "question": pair["question"], **scores})
+
+        if remaining is not None:
+            remaining -= len(questions)
 
     n = len(per_question_results)
     avg_faithfulness = round(sum(r["faithfulness"] for r in per_question_results) / n, 3)

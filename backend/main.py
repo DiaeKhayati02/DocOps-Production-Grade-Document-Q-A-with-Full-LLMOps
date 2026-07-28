@@ -157,12 +157,12 @@ def list_experiments(db: Session = Depends(get_db)):
 
 
 class CiRunRequest(BaseModel):
-    max_questions_per_pdf: int | None = None
+    max_total_questions: int | None = None
 
 
 @app.post("/ci/run")
 async def start_ci_run(payload: CiRunRequest, db: Session = Depends(get_db)):
-    return await run_ci_eval(db, max_questions_per_pdf=payload.max_questions_per_pdf)
+    return await run_ci_eval(db, max_total_questions=payload.max_total_questions)
 
 
 @app.get("/ci/runs")
