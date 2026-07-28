@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DocOps — Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="dashboard.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">D</span>
+      <h1>DocOps</h1>
+    </div>
+    <nav>
+      <a href="index.html">Chat</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="metric-grid">
+      <div class="card metric-card">
+        <span class="metric-label">Faithfulness (7d)</span>
+        <span class="metric-value" id="metric-faithfulness">—</span>
+      </div>
+      <div class="card metric-card">
+        <span class="metric-label">Answer relevance (7d)</span>
+        <span class="metric-value" id="metric-answer-relevance">—</span>
+      </div>
+      <div class="card metric-card">
+        <span class="metric-label">Context relevance (7d)</span>
+        <span class="metric-value" id="metric-context-relevance">—</span>
+      </div>
+      <div class="card metric-card">
+        <span class="metric-label">Avg latency (7d)</span>
+        <span class="metric-value" id="metric-latency">—</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>RAGAS scores — last 30 days</h2>
+      <canvas id="scores-chart" height="90"></canvas>
+    </section>
+
+    <section class="card">
+      <h2>Queries per day — last 30 days</h2>
+      <canvas id="queries-chart" height="90"></canvas>
+    </section>
+
+    <section class="card">
+      <h2>Experiments</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Config</th>
+              <th>Faithfulness</th>
+              <th>Answer rel.</th>
+              <th>Context rel.</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="experiments-body">
+            <tr><td colspan="6" class="muted">No experiments yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>CI runs</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Commit</th>
+              <th>Branch</th>
+              <th>Faithfulness</th>
+              <th>Answer rel.</th>
+              <th>Context rel.</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="ci-runs-body">
+            <tr><td colspan="7" class="muted">No CI runs yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
