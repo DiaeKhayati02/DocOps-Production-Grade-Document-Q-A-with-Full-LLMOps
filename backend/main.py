@@ -4,7 +4,8 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from config import settings
-from database import Document, EvalScore, Experiment, Message, SessionLocal, get_db
+from ci_eval import run_ci_eval
+from database import CiRun, Document, EvalScore, Experiment, Message, SessionLocal, get_db
 from evaluation import score_response
 from experiments import run_experiment
 from ingest import process_upload
@@ -151,6 +152,34 @@ def list_experiments(db: Session = Depends(get_db)):
             "created_at": e.created_at,
         }
         for e in experiments
+    ]
+
+
+class CiRunRequest(BaseModel):
+    max_questions_per_pdf: int | None = None
+
+
+@app.post("/ci/run")
+async def start_ci_run(payload: CiRunRequest, db: Session = Depends(get_db)):
+    return await run_ci_eval(db, max_questions_per_pdf=payload.max_questions_per_pdf)
+
+
+@app.get("/ci/runs")
+def list_ci_runs(db: Session = Depends(get_db)):
+    runs = db.query(CiRun).order_by(CiRun.created_at.desc()).all()
+    return [
+        {
+            "id": r.id,
+            "commit_sha": r.commit_sha,
+            "branch": r.branch,
+            "avg_faithfulness": r.avg_faithfulness,
+            "avg_answer_relevance": r.avg_answer_relevance,
+            "avg_context_relevance": r.avg_context_relevance,
+            "passed": r.passed,
+            "failure_reason": r.failure_reason,
+            "created_at": r.created_at,
+        }
+        for r in runs
     ]
 
 
