@@ -478,9 +478,11 @@ jobs:
           LANGCHAIN_TRACING_V2: "true"
           LANGCHAIN_PROJECT: "docops-ci"
           # Capped to stay within Gemini's free-tier daily quota (20
-          # requests/day; CI-mode scoring costs ~7 calls/question). Remove
-          # this once on a paid tier to score the full 30-question dataset.
-          CI_EVAL_MAX_TOTAL_QUESTIONS: "2"
+          # requests/day; CI-mode scoring costs ~7-10 calls/question,
+          # variable). Kept to 1 for real safety margin — 2 still hit the
+          # wall on test runs. Remove this once on a paid tier to score
+          # the full 30-question dataset.
+          CI_EVAL_MAX_TOTAL_QUESTIONS: "1"
         run: python tests/run_ci_eval.py
 
       - name: Report results
