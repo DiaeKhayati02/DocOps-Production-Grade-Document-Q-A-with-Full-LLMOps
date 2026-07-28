@@ -15,7 +15,12 @@ import instructor
 from google import genai
 from ragas.embeddings import GoogleEmbeddings
 from ragas.llms.base import InstructorLLM, InstructorModelArgs
-from ragas.metrics.collections import AnswerRelevancy, ContextRelevance, Faithfulness
+from ragas.metrics.collections import (
+    AnswerCorrectness,
+    AnswerRelevancy,
+    ContextRelevance,
+    Faithfulness,
+)
 
 from config import settings
 from retry import with_retry_async
@@ -36,6 +41,7 @@ _ragas_embeddings = GoogleEmbeddings(client=_client, model="gemini-embedding-001
 _faithfulness = Faithfulness(llm=_ragas_llm)
 _answer_relevancy = AnswerRelevancy(llm=_ragas_llm, embeddings=_ragas_embeddings)
 _context_relevance = ContextRelevance(llm=_ragas_llm)
+_answer_correctness = AnswerCorrectness(llm=_ragas_llm, embeddings=_ragas_embeddings)
 
 
 def _clean_score(value: float) -> float:
@@ -48,7 +54,9 @@ def _clean_score(value: float) -> float:
     return round(value, 3)
 
 
-async def score_response(question: str, answer: str, contexts: list[str]) -> dict:
+async def score_response(
+    question: str, answer: str, contexts: list[str], ground_truth: str | None = None
+) -> dict:
     faithfulness_result = await with_retry_async(
         lambda: _faithfulness.ascore(
             user_input=question, response=answer, retrieved_contexts=contexts
@@ -65,9 +73,21 @@ async def score_response(question: str, answer: str, contexts: list[str]) -> dic
     answer_relevance = _clean_score(answer_relevance_result.value)
     context_relevance = _clean_score(context_relevance_result.value)
 
-    return {
+    scores = {
         "faithfulness": faithfulness,
         "answer_relevance": answer_relevance,
         "context_relevance": context_relevance,
         "avg_score": round((faithfulness + answer_relevance + context_relevance) / 3, 3),
     }
+
+    # answer_correctness needs a ground-truth reference answer, which only
+    # exists for the golden CI dataset — live app evals never compute it.
+    if ground_truth is not None:
+        correctness_result = await with_retry_async(
+            lambda: _answer_correctness.ascore(
+                user_input=question, response=answer, reference=ground_truth
+            )
+        )
+        scores["answer_correctness"] = _clean_score(correctness_result.value)
+
+    return scores
