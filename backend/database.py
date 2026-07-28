@@ -84,6 +84,20 @@ class Experiment(Base):
     created_at = Column(TIMESTAMP, server_default=func.now())
 
 
+class CiRun(Base):
+    __tablename__ = "ci_runs"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()"))
+    commit_sha = Column(Text, nullable=False)
+    branch = Column(Text, nullable=False)
+    avg_faithfulness = Column(Numeric(4, 3))
+    avg_answer_relevance = Column(Numeric(4, 3))
+    avg_context_relevance = Column(Numeric(4, 3))
+    passed = Column(Boolean, nullable=False)
+    failure_reason = Column(Text)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+
+
 def get_db():
     db = SessionLocal()
     try:
